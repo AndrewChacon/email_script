@@ -2,36 +2,49 @@ import os
 import smtplib
 import time
 import schedule
+from random import randrange
+from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
 
 user_email = os.getenv('user_email')
 user_password = os.getenv('user_password')
-
 test_email = os.getenv('test_email')
 professor_email = os.getenv('professor_email')
 
+check_in_subject = os.getenv('check_in_subject')
+check_in_content = os.getenv('check_in_content')
+check_in_email = 'Subject: {}\n\n{}'.format(check_in_subject, check_in_content)
 
-def send_email():
+check_out_subject = os.getenv('check_out_subject')
+check_out_content = os.getenv('check_out_content')
+check_out_email = 'Subject: {}\n\n{}'.format(
+    check_out_subject, check_out_content)
+
+
+def confirm_email():
+    print("Email Sent At:")
+    print(datetime.now(tz=None))
+    print("")
+
+
+def send_email(message):
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
     server.login(user_email, user_password)
-
-    email_subject = 'EMAIL SUBJECT'
-    email_text = 'EMAIL CONTENT'
-    message = 'Subject: {}\n\n{}'.format(email_subject, email_text)
-
     server.sendmail(user_email, user_email, message)
     server.quit()
+    confirm_email()
 
 
-schedule.every().day.at("00:57").do(send_email)
+print('\nServer Is Up And Running\n')
+
+schedule.every().tuesday.at('09:15').do(lambda: send_email(check_in_email))
+schedule.every().tuesday.at('11:15').do(lambda: send_email(check_out_email))
+
+schedule.every().thursday.at('09:15').do(lambda: send_email(check_in_email))
+schedule.every().thursday.at('11:15').do(lambda: send_email(check_out_email))
 
 while True:
     schedule.run_pending()
     time.sleep(1)
-
-
-# import datetime as dt
-# send_time = dt.datetime(2020, 4, 12, 23, 4, 0)
-# time.sleep(send_time.timestamp() - time.time())
